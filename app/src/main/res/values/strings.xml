@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PlayerMatch</string>
+
+    <!-- Auth -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="logout">Logout</string>
+
+    <!-- Sports -->
+    <string name="select_sport">Select Sport</string>
+    <string name="cricket">Cricket</string>
+    <string name="football">Football</string>
+    <string name="badminton">Badminton</string>
+    <string name="basketball">Basketball</string>
+    <string name="tennis">Tennis</string>
+    <string name="volleyball">Volleyball</string>
+
+    <!-- Home / Discovery -->
+    <string name="nearby_players">Nearby Players</string>
+    <string name="no_players_found">No players found nearby</string>
+
+    <!-- Teams -->
+    <string name="teams">Teams</string>
+    <string name="create_team">Create Team</string>
+    <string name="join_team">Join Team</string>
+    <string name="slots_available">Slots Available</string>
+
+    <!-- Join Requests -->
+    <string name="send_request">Send Join Request</string>
+    <string name="accept">Accept</string>
+    <string name="reject">Reject</string>
+    <string name="pending">Pending</string>
+    <string name="accepted">Accepted</string>
+    <string name="rejected">Rejected</string>
+
+    <!-- Map -->
+    <string name="map">Map</string>
+    <string name="nearby_teams">Nearby Teams</string>
+
+    <!-- Chat -->
+    <string name="message_hint">Type a message…</string>
+    <string name="send">Send</string>
+
+    <!-- Profile -->
+    <string name="profile">Profile</string>
+    <string name="edit_profile">Edit Profile</string>
+
+    <!-- Permissions -->
+    <string name="location_permission_rationale">PlayerMatch needs your location to find nearby players and teams.</string>
+</resources>
