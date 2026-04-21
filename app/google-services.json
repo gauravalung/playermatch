@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46461963373",
+    "project_id": "player-match-ed271",
+    "storage_bucket": "player-match-ed271.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46461963373:android:1dec6112f4bc775a158364",
+        "android_client_info": {
+          "package_name": "com.playermatch.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH4YDu8hRAjhFn3SdBetd_StNgdmFoFJc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
