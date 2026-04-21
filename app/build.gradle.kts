@@ -19,7 +19,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Replace with your actual Google Maps API key from Google Cloud Console
-        manifestPlaceholders["MAPS_API_KEY"] = "YOUR_MAPS_API_KEY_HERE"
+        manifestPlaceholders["MAPS_API_KEY"] = "AIzaSyBOQoXwGYtrCwB9Pw3bHoKf220FeTnNwJk"
     }
 
     buildTypes {
