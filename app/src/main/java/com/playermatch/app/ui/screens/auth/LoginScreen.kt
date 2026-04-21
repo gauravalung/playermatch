@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToVerification: (email: String) -> Unit = {},
     viewModel: AuthViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -55,9 +57,17 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            viewModel.resetState()
-            onLoginSuccess()
+        when (uiState) {
+            is AuthUiState.Success -> {
+                viewModel.resetState()
+                onLoginSuccess()
+            }
+            is AuthUiState.VerificationEmailSent -> {
+                // Resend from login triggered — navigate to verification screen
+                viewModel.resetState()
+                onNavigateToVerification(email.trim())
+            }
+            else -> Unit
         }
     }
 
@@ -127,18 +137,38 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                isError = uiState is AuthUiState.Error
+                isError = uiState is AuthUiState.Error ||
+                          uiState is AuthUiState.EmailNotVerified
             )
 
-            // Error message
-            if (uiState is AuthUiState.Error) {
-                Text(
-                    text = (uiState as AuthUiState.Error).message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Error or "email not verified" feedback
+            when (val state = uiState) {
+                is AuthUiState.Error -> {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                is AuthUiState.EmailNotVerified -> {
+                    Text(
+                        text = "Your email is not verified yet. Please check your inbox.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // Inline resend option
+                    FilledTonalButton(
+                        onClick = { viewModel.resendVerificationEmail() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Resend Verification Email")
+                    }
+                }
+                else -> Unit
             }
 
             Spacer(modifier = Modifier.height(4.dp))

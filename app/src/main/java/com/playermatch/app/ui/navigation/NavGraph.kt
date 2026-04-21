@@ -24,6 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import com.playermatch.app.ui.screens.auth.EmailVerificationScreen
 import com.playermatch.app.ui.screens.auth.LoginScreen
 import com.playermatch.app.ui.screens.auth.RegisterScreen
 import com.playermatch.app.ui.screens.chat.ChatScreen
@@ -45,7 +46,13 @@ private val bottomNavItems = listOf(
 fun NavGraph() {
     val navController = rememberNavController()
     val currentUser = FirebaseAuth.getInstance().currentUser
-    val startDestination = if (currentUser != null) Screen.Home.route else Screen.Login.route
+    val startDestination = when {
+        currentUser == null -> Screen.Login.route
+        // User registered but hasn't verified email yet — send them to verification screen
+        !currentUser.isEmailVerified ->
+            Screen.EmailVerification.createRoute(currentUser.email ?: "")
+        else -> Screen.Home.route
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -74,17 +81,42 @@ fun NavGraph() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                    onNavigateToRegister = { navController.navigate(Screen.Register.route) },
+                    onNavigateToVerification = { email ->
+                        navController.navigate(Screen.EmailVerification.createRoute(email))
+                    }
                 )
             }
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onRegisterSuccess = {
+                        // After register, always go to email verification before Home
+                        val email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+                        navController.navigate(Screen.EmailVerification.createRoute(email)) {
+                            popUpTo(Screen.Login.route) { inclusive = false }
+                        }
+                    },
+                    onNavigateToLogin = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = Screen.EmailVerification.route,
+                arguments = listOf(navArgument("email") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val encodedEmail = backStackEntry.arguments?.getString("email") ?: ""
+                val email = java.net.URLDecoder.decode(encodedEmail, "UTF-8")
+                EmailVerificationScreen(
+                    email = email,
+                    onVerified = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onNavigateToLogin = { navController.popBackStack() }
+                    onBackToLogin = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 )
             }
 

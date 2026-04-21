@@ -23,7 +23,15 @@ sealed class Screen(val route: String) {
             "chat/$chatId/$otherUserId/$otherUserName"
     }
 
+    object EmailVerification : Screen("email_verification/{email}") {
+        fun createRoute(email: String) = "email_verification/${email.encodeForRoute()}"
+    }
+
     object PlayerDetail : Screen("player_detail/{playerId}") {
         fun createRoute(playerId: String) = "player_detail/$playerId"
     }
 }
+
+// Encode special characters (e.g. '@', '.') so they survive NavController routing
+private fun String.encodeForRoute() =
+    java.net.URLEncoder.encode(this, "UTF-8")
