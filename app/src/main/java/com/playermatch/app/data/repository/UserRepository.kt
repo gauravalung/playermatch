@@ -44,4 +44,13 @@ class UserRepository {
     suspend fun updateFcmToken(uid: String, token: String): Result<Unit> = runCatching {
         users.document(uid).update("fcmToken", token).await()
     }
+
+    // All registered users — filtered / sorted client-side in ViewModels
+    fun getAllUsersFlow(): Flow<List<User>> = callbackFlow {
+        val listener = users.addSnapshotListener { snapshot, error ->
+            if (error != null) { close(error); return@addSnapshotListener }
+            trySend(snapshot?.toObjects(User::class.java) ?: emptyList())
+        }
+        awaitClose { listener.remove() }
+    }
 }
