@@ -24,12 +24,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.playermatch.app.ui.screens.auth.EmailVerificationScreen
 import com.playermatch.app.ui.screens.auth.LoginScreen
 import com.playermatch.app.ui.screens.auth.RegisterScreen
 import com.playermatch.app.ui.screens.chat.ChatScreen
 import com.playermatch.app.ui.screens.home.HomeScreen
 import com.playermatch.app.ui.screens.map.MapScreen
+import com.playermatch.app.ui.screens.notifications.NotificationsScreen
+import com.playermatch.app.ui.screens.notifications.NotificationsViewModel
 import com.playermatch.app.ui.screens.profile.ProfileScreen
 import com.playermatch.app.ui.screens.team.CreateTeamScreen
 import com.playermatch.app.ui.screens.team.TeamDetailScreen
@@ -45,6 +48,8 @@ private val bottomNavItems = listOf(
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    // Activity-scoped so unread count persists across screens without double reads
+    val notificationsViewModel: NotificationsViewModel = viewModel()
     val currentUser = FirebaseAuth.getInstance().currentUser
     val startDestination = when {
         currentUser == null -> Screen.Login.route
@@ -122,7 +127,10 @@ fun NavGraph() {
 
             // Main
             composable(Screen.Home.route) {
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    notificationsViewModel = notificationsViewModel
+                )
             }
             composable(Screen.Map.route) {
                 MapScreen(navController = navController)
@@ -137,6 +145,14 @@ fun NavGraph() {
                             popUpTo(0) { inclusive = true }
                         }
                     }
+                )
+            }
+
+            // Notifications
+            composable(Screen.Notifications.route) {
+                NotificationsScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = notificationsViewModel
                 )
             }
 

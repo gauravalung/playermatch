@@ -132,11 +132,13 @@ class TeamDetailViewModel : ViewModel() {
 
     fun sendJoinRequest(teamId: String) {
         val uid = currentUserId ?: return
+        val hostId = _team.value?.hostId ?: ""
+        val sportName = _team.value?.sport ?: ""
         viewModelScope.launch {
             _actionState.value = RequestActionState.Loading
             userRepo.getUser(uid)
                 .onSuccess { user ->
-                    joinRepo.sendRequest(teamId, uid, user?.name ?: "Player")
+                    joinRepo.sendRequest(teamId, uid, user?.name ?: "Player", hostId, sportName)
                         .onSuccess { _actionState.value = RequestActionState.Success("Request sent!") }
                         .onFailure { _actionState.value = RequestActionState.Error(it.message ?: "Failed to send request") }
                 }
@@ -166,18 +168,20 @@ class TeamDetailViewModel : ViewModel() {
     // ── Host actions ───────────────────────────────────────────────────────────
 
     fun acceptRequest(request: JoinRequest) {
+        val hostName = _team.value?.hostName ?: "Host"
         viewModelScope.launch {
             _actionState.value = RequestActionState.Loading
-            joinRepo.acceptRequest(request)
+            joinRepo.acceptRequest(request, hostName)
                 .onSuccess { _actionState.value = RequestActionState.Success("${request.senderName} accepted!") }
                 .onFailure { _actionState.value = RequestActionState.Error(it.message ?: "Failed to accept") }
         }
     }
 
     fun rejectRequest(request: JoinRequest) {
+        val hostName = _team.value?.hostName ?: "Host"
         viewModelScope.launch {
             _actionState.value = RequestActionState.Loading
-            joinRepo.rejectRequest(request.id)
+            joinRepo.rejectRequest(request, hostName)
                 .onSuccess { _actionState.value = RequestActionState.Success("${request.senderName} rejected") }
                 .onFailure { _actionState.value = RequestActionState.Error(it.message ?: "Failed to reject") }
         }

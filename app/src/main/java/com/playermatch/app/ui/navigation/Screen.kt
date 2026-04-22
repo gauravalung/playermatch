@@ -30,6 +30,8 @@ sealed class Screen(val route: String) {
     object PlayerDetail : Screen("player_detail/{playerId}") {
         fun createRoute(playerId: String) = "player_detail/$playerId"
     }
+
+    object Notifications : Screen("notifications")
 }
 
 // Encode special characters (e.g. '@', '.') so they survive NavController routing
