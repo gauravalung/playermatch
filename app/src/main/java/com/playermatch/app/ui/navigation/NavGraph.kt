@@ -33,6 +33,7 @@ import com.playermatch.app.ui.screens.home.HomeScreen
 import com.playermatch.app.ui.screens.map.MapScreen
 import com.playermatch.app.ui.screens.notifications.NotificationsScreen
 import com.playermatch.app.ui.screens.notifications.NotificationsViewModel
+import com.playermatch.app.ui.screens.player.PlayerDetailScreen
 import com.playermatch.app.ui.screens.profile.ProfileScreen
 import com.playermatch.app.ui.screens.team.CreateTeamScreen
 import com.playermatch.app.ui.screens.team.TeamDetailScreen
@@ -166,6 +167,15 @@ fun NavGraph() {
             ) { backStackEntry ->
                 TeamDetailScreen(
                     teamId = backStackEntry.arguments?.getString("teamId") ?: "",
+                    navController = navController
+                )
+            }
+            composable(
+                route = Screen.PlayerDetail.route,
+                arguments = listOf(navArgument("playerId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                PlayerDetailScreen(
+                    playerId = backStackEntry.arguments?.getString("playerId") ?: "",
                     navController = navController
                 )
             }

@@ -1,6 +1,7 @@
 package com.playermatch.app.ui.screens.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -178,7 +179,14 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(players, key = { it.user.uid }) { player ->
-                            PlayerCard(player = player)
+                            PlayerCard(
+                                player = player,
+                                onClick = {
+                                    navController.navigate(
+                                        Screen.PlayerDetail.createRoute(player.user.uid)
+                                    )
+                                }
+                            )
                         }
                     }
                 }
@@ -188,9 +196,11 @@ fun HomeScreen(
 }
 
 @Composable
-private fun PlayerCard(player: PlayerWithDistance) {
+private fun PlayerCard(player: PlayerWithDistance, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
