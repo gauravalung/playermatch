@@ -164,7 +164,9 @@ fun NavGraph() {
                 ChatScreen(
                     chatId = backStackEntry.arguments?.getString("chatId") ?: "",
                     otherUserId = backStackEntry.arguments?.getString("otherUserId") ?: "",
-                    otherUserName = backStackEntry.arguments?.getString("otherUserName") ?: "",
+                    otherUserName = java.net.URLDecoder.decode(
+                        backStackEntry.arguments?.getString("otherUserName") ?: "", "UTF-8"
+                    ),
                     onBack = { navController.popBackStack() }
                 )
             }

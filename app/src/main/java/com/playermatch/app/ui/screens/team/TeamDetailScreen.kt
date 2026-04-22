@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HourglassTop
@@ -54,6 +55,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.playermatch.app.data.model.JoinRequest
+import com.playermatch.app.ui.navigation.Screen
 import com.playermatch.app.data.model.Team
 import com.playermatch.app.data.repository.AuthRepository
 import com.playermatch.app.data.repository.JoinRequestRepository
@@ -261,11 +263,18 @@ fun TeamDetailScreen(
                     SlotsCard(team = t, isFull = isFull, slotsLeft = slotsLeft)
 
                     if (isHost) {
+                        val uid = viewModel.currentUserId
                         HostRequestsSection(
                             allRequests = allRequests,
                             isBusy = isActionBusy,
+                            currentUserId = uid,
                             onAccept = { viewModel.acceptRequest(it) },
-                            onReject = { viewModel.rejectRequest(it) }
+                            onReject = { viewModel.rejectRequest(it) },
+                            onNavigateToChat = { chatId, otherUid, otherName ->
+                                navController.navigate(
+                                    Screen.Chat.createRoute(chatId, otherUid, otherName)
+                                )
+                            }
                         )
                     } else {
                         PlayerRequestSection(
@@ -273,9 +282,19 @@ fun TeamDetailScreen(
                             teamId = t.id,
                             isFull = isFull,
                             isBusy = isActionBusy,
+                            hostId = t.hostId,
+                            hostName = t.hostName,
+                            currentUserId = viewModel.currentUserId,
                             onSend = { viewModel.sendJoinRequest(t.id) },
                             onCancel = { myRequest?.id?.let { viewModel.cancelRequest(it) } },
-                            onResend = { myRequest?.id?.let { viewModel.resendRequest(it) } }
+                            onResend = { myRequest?.id?.let { viewModel.resendRequest(it) } },
+                            onMessageHost = {
+                                val uid = viewModel.currentUserId ?: return@PlayerRequestSection
+                                val chatId = "${minOf(uid, t.hostId)}_${maxOf(uid, t.hostId)}"
+                                navController.navigate(
+                                    Screen.Chat.createRoute(chatId, t.hostId, t.hostName)
+                                )
+                            }
                         )
                     }
                 }
@@ -379,9 +398,13 @@ private fun PlayerRequestSection(
     teamId: String,
     isFull: Boolean,
     isBusy: Boolean,
+    hostId: String,
+    hostName: String,
+    currentUserId: String?,
     onSend: () -> Unit,
     onCancel: () -> Unit,
-    onResend: () -> Unit
+    onResend: () -> Unit,
+    onMessageHost: () -> Unit
 ) {
     when (myRequest?.status) {
         null -> {
@@ -468,6 +491,14 @@ private fun PlayerRequestSection(
                     }
                 }
             }
+            Button(
+                onClick = onMessageHost,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.Chat, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Message Host")
+            }
         }
 
         JoinRequest.STATUS_REJECTED -> {
@@ -507,8 +538,10 @@ private fun PlayerRequestSection(
 private fun HostRequestsSection(
     allRequests: List<JoinRequest>,
     isBusy: Boolean,
+    currentUserId: String?,
     onAccept: (JoinRequest) -> Unit,
-    onReject: (JoinRequest) -> Unit
+    onReject: (JoinRequest) -> Unit,
+    onNavigateToChat: (chatId: String, otherUserId: String, otherUserName: String) -> Unit
 ) {
     val pending = allRequests.filter { it.status == JoinRequest.STATUS_PENDING }
     val accepted = allRequests.filter { it.status == JoinRequest.STATUS_ACCEPTED }
@@ -560,14 +593,36 @@ private fun HostRequestsSection(
                 Spacer(Modifier.height(8.dp))
                 accepted.forEachIndexed { index, request ->
                     if (index > 0) HorizontalDivider(Modifier.padding(vertical = 6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Icon(
                             Icons.Filled.CheckCircle, null,
                             Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text(request.senderName, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            request.senderName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (currentUserId != null) {
+                            IconButton(
+                                onClick = {
+                                    val chatId = "${minOf(currentUserId, request.senderId)}_${maxOf(currentUserId, request.senderId)}"
+                                    onNavigateToChat(chatId, request.senderId, request.senderName)
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Chat,
+                                    contentDescription = "Message ${request.senderName}",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -20,7 +20,7 @@ sealed class Screen(val route: String) {
 
     object Chat : Screen("chat/{chatId}/{otherUserId}/{otherUserName}") {
         fun createRoute(chatId: String, otherUserId: String, otherUserName: String) =
-            "chat/$chatId/$otherUserId/$otherUserName"
+            "chat/$chatId/$otherUserId/${otherUserName.encodeForRoute()}"
     }
 
     object EmailVerification : Screen("email_verification/{email}") {
